@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="84c2ee33-1d57-418e-9e4b-e585319f5dc7" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/java/org/max/home/accu/HomeGetWeatherOneDayTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/java/org/max/home/accu/HomeGetWeatherTenDayTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/max/home/accu/AbstractTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/max/home/accu/AbstractTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,8 +40,12 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "lesson5",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/User/IdeaProjects/Vvedenie-v-automatizatsiy-testirovania",
+    "project.structure.last.edited": "Artifacts",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
     "settings.editor.selected.configurable": "MavenSettings"
   }
 }]]></component>
@@ -145,5 +147,16 @@
       <updated>1702988364369</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
