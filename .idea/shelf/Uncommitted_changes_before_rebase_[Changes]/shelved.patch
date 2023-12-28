@@ -1,0 +1,279 @@
+Index: src/test/java/org/max/home/accu/HomeGetWeatherOneDayTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/org/max/home/accu/HomeGetWeatherOneDayTest.java b/src/test/java/org/max/home/accu/HomeGetWeatherOneDayTest.java
+new file mode 100644
+--- /dev/null	(date 1703685335515)
++++ b/src/test/java/org/max/home/accu/HomeGetWeatherOneDayTest.java	(date 1703685335515)
+@@ -0,0 +1,90 @@
++package org.max.home.accu;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import org.apache.http.HttpResponse;
++import org.apache.http.client.methods.HttpGet;
++import org.apache.http.impl.client.CloseableHttpClient;
++import org.apache.http.impl.client.HttpClients;
++import org.junit.jupiter.api.Test;
++import org.max.home.accu.weather.DailyForecast;
++import org.max.home.accu.weather.Headline;
++import org.max.home.accu.weather.Weather;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
++
++import java.io.IOException;
++import java.net.URISyntaxException;
++import java.util.ArrayList;
++import java.util.List;
++
++import static com.github.tomakehurst.wiremock.client.WireMock.*;
++import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
++import static org.junit.jupiter.api.Assertions.assertEquals;
++
++public class HomeGetWeatherOneDayTest extends AbstractTest {
++
++    private static final Logger logger
++            = LoggerFactory.getLogger(HomeGetWeatherOneDayTest.class);
++
++    @Test
++    void get_shouldReturn200() throws IOException, URISyntaxException {
++        logger.info("Тест код ответ 200 запущен");
++
++        //given
++        ObjectMapper mapper = new ObjectMapper();
++        Weather weather = new Weather();
++        Headline headline = new Headline();
++        headline.setCategory("Страна");
++        headline.setText("Библия");
++        weather.setHeadline(headline);
++        DailyForecast dailyForecast = new DailyForecast();
++        List<DailyForecast> dailyForecasts = new ArrayList<>();
++        dailyForecasts.add(dailyForecast);
++        weather.setDailyForecasts(dailyForecasts);
++
++        logger.debug("Формирование мока для GET /forecasts/v1/daily/1day/2940");
++        stubFor(get(urlPathEqualTo("/forecasts/v1/daily/1day/2940"))
++                .willReturn(aResponse()
++                        .withStatus(200).withBody(mapper.writeValueAsString(weather))));
++
++        CloseableHttpClient httpClient = HttpClients.createDefault();
++
++        HttpGet request = new HttpGet(getBaseUrl() + "/forecasts/v1/daily/1day/2940");
++        logger.debug("http клиент создан");
++        //when
++        HttpResponse response = httpClient.execute(request);
++        //then
++        verify(getRequestedFor(urlPathEqualTo("/forecasts/v1/daily/1day/2940")));
++        assertEquals(200, response.getStatusLine().getStatusCode());
++        Weather responseBody = mapper.readValue(response.getEntity().getContent(), Weather.class);
++        assertEquals("Страна", responseBody.getHeadline().getCategory());
++        assertEquals("Библия", responseBody.getHeadline().getText());
++        assertEquals(1, responseBody.getDailyForecasts().size());
++    }
++
++    @Test
++    void get_shouldReturn500() throws IOException {
++        logger.info("Тест код ответ 500 запущен");
++        //given
++        logger.debug("Формирование мока для GET /forecasts/v1/daily/2day/294021");
++        stubFor(get(urlPathEqualTo("/forecasts/v1/daily/2day/294021"))
++                .willReturn(aResponse()
++                        .withStatus(500).withBody("ERROR")));
++        CloseableHttpClient httpClient = HttpClients.createDefault();
++        HttpGet request = new HttpGet(getBaseUrl()+"/forecasts/v1/daily/2day/294021");
++        logger.debug("http клиент создан");
++        //when
++        HttpResponse response = httpClient.execute(request);
++        //then
++        verify(getRequestedFor(urlPathEqualTo("/forecasts/v1/daily/2day/294021")));
++        assertEquals(500, response.getStatusLine().getStatusCode());
++        assertEquals("ERROR", convertResponseToString(response));
++    }
++}
++
++
++
++
++
++
++
+Index: src/test/java/org/max/seminar/accu/NewTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/org/max/seminar/accu/NewTest.java b/src/test/java/org/max/seminar/accu/NewTest.java
+new file mode 100644
+--- /dev/null	(date 1703609763434)
++++ b/src/test/java/org/max/seminar/accu/NewTest.java	(date 1703609763434)
+@@ -0,0 +1,41 @@
++package org.max.seminar.accu;
++
++import org.junit.jupiter.api.Assertions;
++import org.junit.jupiter.api.Test;
++
++import java.util.HashMap;
++
++import static com.github.tomakehurst.wiremock.client.WireMock.*;
++import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
++import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
++import static io.restassured.RestAssured.given;
++
++public class NewTest extends AbstractTest{
++
++    public static final String LOCATIONS_V_1_CITIES_AUTOCOMPLETE = "/locations/v1/cities/autocomplete";
++
++
++
++    @Test
++    void get_shouldReturn200WithRestAssure(){
++
++        stubFor(get(urlPathEqualTo(LOCATIONS_V_1_CITIES_AUTOCOMPLETE))
++                .willReturn(aResponse().withStatus(200).withBody("Hello!")));
++        
++
++        given().when().get(getBaseUrl() + LOCATIONS_V_1_CITIES_AUTOCOMPLETE)
++                .then().statusCode(200);
++
++        HashMap<String,String> hashMap = new HashMap();
++        hashMap.put("s", "string");
++        hashMap.put("i", "integer123");
++
++
++        String string = given().queryParams(hashMap).when().get(getBaseUrl() + LOCATIONS_V_1_CITIES_AUTOCOMPLETE)
++                .then().statusCode(200).extract().body().asString();
++
++        Assertions.assertEquals("Hello!", string);
++
++
++    }
++}
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n\r\n    <groupId>org.max</groupId>\r\n    <artifactId>auto</artifactId>\r\n    <version>1.0-SNAPSHOT</version>\r\n\r\n    <!-- Переменные -->\r\n    <properties>\r\n        <maven.compiler.source>17</maven.compiler.source>\r\n        <maven.compiler.target>17</maven.compiler.target>\r\n        <junit.version>5.7.2</junit.version>\r\n        <logback.version>1.3.5</logback.version>\r\n        <slf4j.version>2.0.4</slf4j.version>\r\n        <mockito.version>5.3.1</mockito.version>\r\n        <wiremock.version>1.58</wiremock.version>\r\n        <surefire.version>2.22.2</surefire.version>\r\n        <jackson.version>2.15.0</jackson.version>\r\n    </properties>\r\n\r\n    <!-- Архивирование -->\r\n    <packaging>jar</packaging>\r\n\r\n    <name>Демо проект</name>\r\n    <description>Демонстрационный проект для курса введения в автоматизацию</description>\r\n    <url>http://demo.max.org</url>\r\n\r\n    <!-- Зависимости -->\r\n    <dependencies>\r\n        <!-- Лекция 1.Зависимости junit -->\r\n        <dependency>\r\n            <groupId>org.junit.jupiter</groupId>\r\n            <artifactId>junit-jupiter-engine</artifactId>\r\n            <version>${junit.version}</version>\r\n            <scope>test</scope>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.junit.jupiter</groupId>\r\n            <artifactId>junit-jupiter-params</artifactId>\r\n            <version>${junit.version}</version>\r\n            <scope>test</scope>\r\n        </dependency>\r\n\r\n        <!-- Лекция 3. Jackson -->\r\n        <dependency>\r\n            <groupId>com.fasterxml.jackson.core</groupId>\r\n            <artifactId>jackson-databind</artifactId>\r\n            <version>${jackson.version}</version>\r\n        </dependency>\r\n\r\n        <!-- Лекция 5. Логирование -->\r\n        <dependency>\r\n            <groupId>ch.qos.logback</groupId>\r\n            <artifactId>logback-core</artifactId>\r\n            <version>${logback.version}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.slf4j</groupId>\r\n            <artifactId>slf4j-api</artifactId>\r\n            <version>${slf4j.version}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>ch.qos.logback</groupId>\r\n            <artifactId>logback-classic</artifactId>\r\n            <version>${logback.version}</version>\r\n        </dependency>\r\n\r\n        <!-- Лекция 5. Мокирование -->\r\n        <dependency>\r\n            <groupId>org.mockito</groupId>\r\n            <artifactId>mockito-core</artifactId>\r\n            <version>${mockito.version}</version>\r\n            <scope>test</scope>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.mockito</groupId>\r\n            <artifactId>mockito-junit-jupiter</artifactId>\r\n            <version>${mockito.version}</version>\r\n            <scope>test</scope>\r\n        </dependency>\r\n\r\n        <!-- Лекция 5. WireMock -->\r\n        <dependency>\r\n            <groupId>com.github.tomakehurst</groupId>\r\n            <artifactId>wiremock</artifactId>\r\n            <version>${wiremock.version}</version>\r\n  <!--          <scope>test</scope>-->\r\n        </dependency>\r\n\r\n    </dependencies>\r\n\r\n    <!-- Сборка -->\r\n    <build>\r\n        <plugins>\r\n            <plugin>\r\n                <groupId>org.apache.maven.plugins</groupId>\r\n                <artifactId>maven-compiler-plugin</artifactId>\r\n                <configuration>\r\n                    <source>17</source>\r\n                    <target>17</target>\r\n                </configuration>\r\n            </plugin>\r\n            <plugin>\r\n                <groupId>org.apache.maven.plugins</groupId>\r\n                <artifactId>maven-surefire-plugin</artifactId>\r\n                <version>${surefire.version}</version>\r\n            </plugin>\r\n        </plugins>\r\n    </build>\r\n\r\n    <!-- Репозитории -->\r\n    <repositories>\r\n        <repository>\r\n            <id>mvnrepository</id>\r\n            <url>https://mvnrepository.com/</url>\r\n        </repository>\r\n    </repositories>\r\n\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/pom.xml b/pom.xml
+--- a/pom.xml	(revision 701a188854e9f0c0655ebd3e9b345ae4201be0b0)
++++ b/pom.xml	(date 1703604441106)
+@@ -19,6 +19,7 @@
+         <wiremock.version>1.58</wiremock.version>
+         <surefire.version>2.22.2</surefire.version>
+         <jackson.version>2.15.0</jackson.version>
++        <assured.version>5.3.0</assured.version>
+     </properties>
+ 
+     <!-- Архивирование -->
+@@ -92,6 +93,13 @@
+             <version>${wiremock.version}</version>
+   <!--          <scope>test</scope>-->
+         </dependency>
++
++        <dependency>
++            <groupId>io.rest-assured</groupId>
++            <artifactId>rest-assured</artifactId>
++            <version>${assured.version}</version>
++            <scope>test</scope>
++        </dependency>
+ 
+     </dependencies>
+ 
+Index: src/test/java/org/max/home/accu/HomeGetWeatherTenDayTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/java/org/max/home/accu/HomeGetWeatherTenDayTest.java b/src/test/java/org/max/home/accu/HomeGetWeatherTenDayTest.java
+new file mode 100644
+--- /dev/null	(date 1703707674184)
++++ b/src/test/java/org/max/home/accu/HomeGetWeatherTenDayTest.java	(date 1703707674184)
+@@ -0,0 +1,86 @@
++package org.max.home.accu;
++
++import com.fasterxml.jackson.databind.ObjectMapper;
++import org.apache.http.HttpResponse;
++import org.apache.http.client.methods.HttpGet;
++import org.apache.http.impl.client.CloseableHttpClient;
++import org.apache.http.impl.client.HttpClients;
++import org.junit.jupiter.api.Assertions;
++import org.junit.jupiter.api.Test;
++import org.max.home.accu.weather.DailyForecast;
++import org.max.home.accu.weather.Headline;
++import org.max.home.accu.weather.Weather;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
++
++import java.io.IOException;
++import java.net.URISyntaxException;
++import java.util.ArrayList;
++import java.util.List;
++
++import static com.github.tomakehurst.wiremock.client.WireMock.*;
++import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
++import static io.restassured.RestAssured.given;
++import static org.hamcrest.Matchers.lessThan;
++import static org.junit.jupiter.api.Assertions.assertEquals;
++
++public class HomeGetWeatherTenDayTest extends AbstractTest{
++    private static final Logger logger
++            = LoggerFactory.getLogger(HomeGetWeatherTenDayTest.class);
++
++    @Test
++    void get_shouldReturn200() throws IOException, URISyntaxException {
++        logger.info("Тест код ответ 200 запущен");
++        //given
++        ObjectMapper mapper = new ObjectMapper();
++        Weather weather = new Weather();
++        Headline headline = new Headline();
++        headline.setCategory("Погода");
++        headline.setText("Прогноз");
++        weather.setHeadline(headline);
++        DailyForecast dailyForecast = new DailyForecast();
++        List<DailyForecast> dailyForecasts = new ArrayList<>();
++        dailyForecasts.add(dailyForecast);
++        weather.setDailyForecasts(dailyForecasts);
++
++        logger.debug("Формирование мока для GET /forecasts/v1/daily/10day/50");
++        stubFor(get(urlPathEqualTo("/forecasts/v1/daily/10day/50"))
++                .willReturn(aResponse()
++                        .withStatus(200).withBody(mapper.writeValueAsString(weather))));
++
++        CloseableHttpClient httpClient = HttpClients.createDefault();
++
++        HttpGet request = new HttpGet(getBaseUrl() + "/forecasts/v1/daily/10day/50");
++        logger.debug("http клиент создан");
++        //when
++        HttpResponse response = httpClient.execute(request);
++        //then
++        verify(getRequestedFor(urlPathEqualTo("/forecasts/v1/daily/10day/50")));
++        assertEquals(200, response.getStatusLine().getStatusCode());
++        Weather responseBody = mapper.readValue(response.getEntity().getContent(), Weather.class);
++        assertEquals("Погода", responseBody.getHeadline().getCategory());
++        assertEquals("Прогноз", responseBody.getHeadline().getText());
++        assertEquals(1, responseBody.getDailyForecasts().size());
++
++
++
++    }
++    @Test
++    void get_shouldReturn500() throws IOException {
++        logger.info("Тест код ответ 500 запущен");
++        //given
++        logger.debug("Формирование мока для GET /forecasts/v1/daily/2day/294021");
++        stubFor(get(urlPathEqualTo("/forecasts/v1/daily/2day/294021"))
++                .willReturn(aResponse()
++                        .withStatus(500).withBody("ERROR")));
++        CloseableHttpClient httpClient = HttpClients.createDefault();
++        HttpGet request = new HttpGet(getBaseUrl()+"/forecasts/v1/daily/2day/294021");
++        logger.debug("http клиент создан");
++        //when
++        HttpResponse response = httpClient.execute(request);
++        //then
++        verify(getRequestedFor(urlPathEqualTo("/forecasts/v1/daily/2day/294021")));
++        assertEquals(500, response.getStatusLine().getStatusCode());
++        assertEquals("ERROR", convertResponseToString(response));
++    }
++}

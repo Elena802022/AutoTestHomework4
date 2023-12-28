@@ -19,7 +19,7 @@ public class AbstractTest {
     private static final int port = 8080;
     private static String baseUrl;
 
-    private static final Logger logger
+    static final Logger logger
             = LoggerFactory.getLogger(AbstractTest.class);
 
     @BeforeAll
